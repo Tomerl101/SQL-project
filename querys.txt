@@ -1,0 +1,171 @@
+1)
+  SELECT * FROM book WHERE quantity > 0;
+
+2)
+  //status=0 (open order)
+  SELECT * FROM orders WHERE status = 0;  
+
+3)
+  SELECT * FROM customers;
+
+4)
+  SELECT * FROM supplier;
+
+5)
+  //get user input start and end dates
+  SELECT * FROM orders WHERE order_date BETWEEN '2018-03-04' AND '2018-06-28' ;
+
+6)SELECT * FROM book WHERE global_discount=1;
+  
+
+7)
+  //get book title from user input
+  SELECT * FROM book WHERE title='book11' AND quantity>0
+
+8)
+SELECT sb.supplier_id, s.name, sb.book_id
+FROM supplier_books AS sb, Book AS b, supplier AS s
+WHERE b.title='book9' AND b.book_id = sb.book_id AND s.supplier_id = sb.supplier_id
+
+OR
+
+SELECT sb.supplier_id, s.name
+FROM supplier AS s JOIN (
+    supplier_books AS sb JOIN
+        Book AS b
+    ON b.book_id = sb.book_id AND b.title='book1')
+ON s.supplier_id = sb.supplier_id
+
+9)
+
+SELECT SUM(od.quantity)
+FROM orders AS o JOIN (
+    book AS b JOIN
+        orderdetails AS od
+    ON b.book_id = od.book_id AND b.title='book8')
+ON o.order_id = od.order_id
+WHERE o.order_date >= '2018-08-22'
+
+10)
+SELECT SUM(od.quantity)
+FROM orderdetails AS od JOIN (
+    customers AS c JOIN
+        orders AS o
+    ON o.customer_id = c.customer_id)
+ON o.order_id = od.order_id AND c.customer_id = 3
+WHERE o.order_date > '2018-08-22'
+
+
+11)
+SELECT c.first_name, c.last_name
+FROM customers AS c
+JOIN
+    (SELECT o.customer_id, SUM(od.quantity) AS pay
+    FROM orderdetails AS od, orders AS o
+    WHERE o.order_id = od.order_id AND o.order_date >= '2018-05-24'
+    GROUP BY o.customer_id)
+AS x
+WHERE c.customer_id = x.customer_id
+ORDER BY x.pay DESC
+LIMIT 1
+
+
+12)
+SELECT s.supplier_id, s.name, x.cost
+FROM supplier AS s
+JOIN
+    (SELECT p.supplier_id, SUM(p.quantity) AS cost
+    FROM purchase AS p
+    WHERE p.purchase_date >= '2018-05-24'
+    GROUP BY p.supplier_id)
+AS x
+ON s.supplier_id = x.supplier_id
+ORDER BY x.cost DESC
+LIMIT 1
+
+
+13)
+SELECT book.title, COUNT(purchase.book_id)
+FROM purchase, book
+WHERE book.book_id = purchase.book_id AND purchase_date BETWEEN '2018-05-13' AND '2019-010-22'
+GROUP BY purchase.book_id
+
+14)
+SELECT COUNT(status)
+FROM orders
+WHERE status = 1 AND order_date BETWEEN '2018-05-13' AND '2019-010-22'
+
+15)SELECT total , IF(total>1000,total*0.1,'no discount') AS discount
+ FROM 
+(SELECT SUM(x.total) AS total 
+FROM orders AS o JOIN
+ (SELECT od.order_id, SUM(b.price * od.quantity) AS total 
+
+FROM book AS b, orderDetails AS od 
+
+WHERE od.book_id = b.book_id GROUP BY od.order_id) AS x 
+
+ON o.order_id = x.order_id 
+WHERE o.customer_id = 2 AND o.order_date >= 2018-06-07
+GROUP BY o.customer_id) as t;
+
+
+
+16)
+SELECT QUARTER(o.order_date) AS quarter, SUM(x.total) AS total
+FROM orders AS o
+JOIN
+    (SELECT od.order_id, SUM(b.price * od.quantity) AS total
+    FROM book AS b, orderdetails AS od
+    WHERE b.book_id = od.book_id
+    GROUP BY od.order_id)
+AS x
+WHERE o.order_id = x.order_id
+GROUP BY quarter
+
+17)
+SELECT COUNT(c.customer_id) AS join_customers
+FROM customers AS c
+WHERE c.join_date > '2018-05-20'
+
+
+18)
+SELECT SUM(p.quantity * sb.price) AS total, p.supplier_id
+FROM purchase AS p, supplier_books AS sb
+WHERE p.supplier_id = sb.supplier_id
+AND sb.book_id = p.book_id
+AND p.supplier_id = 3
+
+19)
+
+SELECT SUM(x.total) AS total
+FROM orders AS o
+JOIN
+    (SELECT od.order_id, SUM(b.price * od.quantity) AS total
+    FROM book AS b, orderDetails AS od
+    WHERE od.book_id = b.book_id
+    GROUP BY od.order_id)
+AS x
+ON o.order_id = x.order_id
+WHERE o.employee_id = 3 AND o.order_date >= '2018-04-01'
+GROUP BY o.employee_id
+
+20)
+
+SELECT b.title, sum_quantity
+FROM book AS b
+JOIN
+    (SELECT od.book_id, SUM(od.quantity) AS sum_quantity
+    FROM orders AS o, orderDetails AS od
+    WHERE o.order_id = od.order_id
+    AND o.order_date BETWEEN '2018-10-10' AND '2018-12-02'
+    GROUP BY od.book_id
+    LIMIT 10)
+AS x
+WHERE x.book_id = b.book_id
+ORDER BY x.sum_quantity DESC
+
+
+
+
+
